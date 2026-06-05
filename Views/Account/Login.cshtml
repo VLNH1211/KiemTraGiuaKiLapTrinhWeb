@@ -1,0 +1,85 @@
+@model KiemTraGiuaKy.Models.LoginViewModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@{
+    ViewData["Title"] = "Đăng nhập";
+    var externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+}
+
+<div class="auth-container">
+    <div class="auth-card card">
+        <div class="auth-header">
+            <i class="bi bi-box-arrow-in-right display-5"></i>
+            <h2 class="mt-2">Đăng nhập</h2>
+            <p>Chào mừng bạn quay trở lại</p>
+        </div>
+        <div class="auth-body">
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">
+                        <i class="bi bi-envelope me-1"></i> Email
+                    </label>
+                    <input asp-for="Email" class="form-control" placeholder="example@email.com" autofocus />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">
+                        <i class="bi bi-lock me-1"></i> Mật khẩu
+                    </label>
+                    <input asp-for="Password" class="form-control" placeholder="Nhập mật khẩu" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label">Ghi nhớ đăng nhập</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                </button>
+            </form>
+
+            @* Câu 9: Google External Login *@
+            @if (externalLogins.Count > 0)
+            {
+                <div class="auth-divider">
+                    <span>hoặc</span>
+                </div>
+
+                <form asp-action="ExternalLogin" method="post">
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                    @foreach (var provider in externalLogins)
+                    {
+                        <button type="submit" name="provider" value="@provider.Name"
+                                class="btn btn-google w-100 mb-2">
+                            @if (provider.Name == "Google")
+                            {
+                                <svg width="20" height="20" viewBox="0 0 48 48" class="me-2">
+                                    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                                    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                                    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                                    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                                </svg>
+                            }
+                            Đăng nhập bằng @provider.DisplayName
+                        </button>
+                    }
+                </form>
+            }
+
+            <div class="text-center mt-3">
+                <span class="text-muted">Chưa có tài khoản?</span>
+                <a asp-action="Register" class="text-decoration-none fw-500">Đăng ký ngay</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

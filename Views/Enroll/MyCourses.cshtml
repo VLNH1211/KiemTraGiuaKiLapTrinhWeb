@@ -1,0 +1,75 @@
+@model IEnumerable<KiemTraGiuaKy.Models.Enrollment>
+@{
+    ViewData["Title"] = "Học phần của tôi";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-book me-2"></i>Học phần của tôi</h1>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-journal-x display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">Bạn chưa đăng ký học phần nào</h4>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">
+            <i class="bi bi-search me-1"></i> Xem danh sách học phần
+        </a>
+    </div>
+}
+else
+{
+    <div class="mb-3">
+        <span class="badge bg-primary fs-6">
+            <i class="bi bi-bookmark-check me-1"></i> @Model.Count() học phần đã đăng ký
+        </span>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var enrollment in Model)
+        {
+            <div class="col">
+                <div class="card h-100 enrollment-card">
+                    @if (!string.IsNullOrEmpty(enrollment.Course.Image))
+                    {
+                        <img src="@enrollment.Course.Image" class="card-img-top" alt="@enrollment.Course.Name" />
+                    }
+                    else
+                    {
+                        <div class="card-img-top d-flex align-items-center justify-content-center">
+                            <i class="bi bi-book display-3 text-white"></i>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@enrollment.Course.Name</h5>
+                        <p class="card-text mb-1">
+                            <i class="bi bi-person-fill text-primary me-1"></i>
+                            @enrollment.Course.Lecturer
+                        </p>
+                        <p class="card-text mb-1">
+                            <i class="bi bi-tag-fill text-secondary me-1"></i>
+                            @enrollment.Course.Category?.Name
+                        </p>
+                        <span class="badge bg-primary mb-2">
+                            <i class="bi bi-star-fill me-1"></i>@enrollment.Course.Credits tín chỉ
+                        </span>
+                        <p class="enrollment-date mb-0">
+                            <i class="bi bi-calendar-check me-1"></i>
+                            Đăng ký: @enrollment.EnrollDate.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 pb-3 px-3">
+                        <form asp-controller="Enroll" asp-action="Unenroll" method="post">
+                            <input type="hidden" name="courseId" value="@enrollment.CourseId" />
+                            <input type="hidden" name="returnUrl" value="/Enroll/MyCourses" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                                    onclick="return confirm('Bạn có chắc muốn hủy đăng ký học phần này?')">
+                                <i class="bi bi-x-circle me-1"></i> Hủy đăng ký
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

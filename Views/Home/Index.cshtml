@@ -1,0 +1,149 @@
+@model KiemTraGiuaKy.Models.PaginatedList<KiemTraGiuaKy.Models.Course>
+@{
+    ViewData["Title"] = "Danh sách Học phần";
+    var enrolledIds = ViewBag.EnrolledCourseIds as List<int> ?? new List<int>();
+    var currentSearch = ViewBag.CurrentSearch as string;
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h1><i class="bi bi-book-half me-2"></i>Danh sách Học phần</h1>
+</div>
+
+<!-- Câu 8: Search Bar -->
+<div class="search-container">
+    <form asp-action="Index" method="get">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" name="search" class="form-control border-start-0"
+                   placeholder="Tìm kiếm học phần theo tên..." value="@currentSearch" />
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search me-1"></i> Tìm kiếm
+            </button>
+            @if (!string.IsNullOrWhiteSpace(currentSearch))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i> Xóa
+                </a>
+            }
+        </div>
+    </form>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(currentSearch))
+{
+    <div class="mb-3">
+        <span class="text-muted">
+            Kết quả tìm kiếm cho "<strong>@currentSearch</strong>" — @Model.TotalItems kết quả
+        </span>
+    </div>
+}
+
+<!-- Course Cards Grid -->
+@if (Model.Count == 0)
+{
+    <div class="text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">Không tìm thấy học phần nào</h4>
+        @if (!string.IsNullOrWhiteSpace(currentSearch))
+        {
+            <a asp-action="Index" class="btn btn-primary mt-2">Xem tất cả học phần</a>
+        }
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        @foreach (var course in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(course.Image))
+                    {
+                        <img src="@course.Image" class="card-img-top" alt="@course.Name" />
+                    }
+                    else
+                    {
+                        <div class="card-img-top d-flex align-items-center justify-content-center">
+                            <i class="bi bi-book display-3 text-white"></i>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@course.Name</h5>
+                        <p class="card-text mb-1">
+                            <i class="bi bi-person-fill text-primary me-1"></i>
+                            <span class="text-muted">@course.Lecturer</span>
+                        </p>
+                        <p class="card-text mb-2">
+                            <i class="bi bi-tag-fill text-secondary me-1"></i>
+                            <span class="text-muted">@course.Category?.Name</span>
+                        </p>
+                        <span class="badge bg-primary">
+                            <i class="bi bi-star-fill me-1"></i>@course.Credits tín chỉ
+                        </span>
+                    </div>
+
+                    @* Câu 6: Enroll / Unenroll button - chỉ hiển thị cho Student *@
+                    @if (User.IsInRole("Student"))
+                    {
+                        <div class="card-footer bg-transparent border-top-0 pb-3 px-3">
+                            @if (enrolledIds.Contains(course.Id))
+                            {
+                                <form asp-controller="Enroll" asp-action="Unenroll" method="post">
+                                    <input type="hidden" name="courseId" value="@course.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                                            onclick="return confirm('Bạn có chắc muốn hủy đăng ký?')">
+                                        <i class="bi bi-x-circle me-1"></i> Hủy đăng ký
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-controller="Enroll" asp-action="Enroll" method="post">
+                                    <input type="hidden" name="courseId" value="@course.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <button type="submit" class="btn btn-success btn-sm w-100">
+                                        <i class="bi bi-plus-circle me-1"></i> Đăng ký
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="d-flex justify-content-center">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(Model.PageIndex - 1)"
+                       asp-route-search="@currentSearch">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-search="@currentSearch">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(Model.PageIndex + 1)"
+                       asp-route-search="@currentSearch">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

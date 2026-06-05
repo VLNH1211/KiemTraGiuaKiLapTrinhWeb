@@ -1,0 +1,64 @@
+@model IEnumerable<KiemTraGiuaKy.Models.Course>
+@{
+    ViewData["Title"] = "Quản lý Học phần";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h1><i class="bi bi-gear-fill me-2"></i>Quản lý Học phần</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Thêm học phần
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th style="width: 80px;">Hình ảnh</th>
+                        <th>Tên học phần</th>
+                        <th>Tín chỉ</th>
+                        <th>Giảng viên</th>
+                        <th>Danh mục</th>
+                        <th style="width: 180px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var course in Model)
+                    {
+                        <tr>
+                            <td>@course.Id</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(course.Image))
+                                {
+                                    <img src="@course.Image" alt="@course.Name" 
+                                         style="width: 50px; height: 35px; object-fit: cover; border-radius: 6px;" />
+                                }
+                                else
+                                {
+                                    <div style="width: 50px; height: 35px; background: linear-gradient(135deg, #4361ee, #3a0ca3); border-radius: 6px;"></div>
+                                }
+                            </td>
+                            <td><strong>@course.Name</strong></td>
+                            <td><span class="badge bg-primary">@course.Credits</span></td>
+                            <td>@course.Lecturer</td>
+                            <td>
+                                <span class="badge bg-secondary">@course.Category?.Name</span>
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@course.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@course.Id" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
